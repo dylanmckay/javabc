@@ -3,4 +3,12 @@ name = "javabc"
 version = "0.1.0"
 authors = ["Dylan McKay <dylanmckay34@gmail.com>"]
 
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "dump"
+path = "tools/dump.rs"
+
 [dependencies]
+byteorder = "0.5"
