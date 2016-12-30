@@ -64,5 +64,19 @@ macro_rules! impl_for_index_type {
     }
 }
 
+impl<T,I> From<Vec<T>> for Array<T,I>
+{
+    fn from(v: Vec<T>) -> Self {
+        Array { items: v, phantom: marker::PhantomData }
+    }
+}
+
+impl<T,I> From<Vec<T>> for OneBasedArray<T,I>
+{
+    fn from(v: Vec<T>) -> Self {
+        OneBasedArray { items: v, phantom: marker::PhantomData }
+    }
+}
+
 impl_for_index_type!(u16, read_u16);
 impl_for_index_type!(u32, read_u32);
