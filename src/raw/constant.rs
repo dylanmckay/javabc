@@ -128,7 +128,7 @@ impl raw::Serializable for Constant
         }
     }
 
-    fn write(&self, write: &mut Write) -> Result<(), Error> {
+    fn write(&self, _write: &mut Write) -> Result<(), Error> {
         unimplemented!();
     }
 }
