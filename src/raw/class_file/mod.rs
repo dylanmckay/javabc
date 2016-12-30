@@ -1,4 +1,4 @@
-pub use self::constant::Constant;
+pub use self::constant::{Constant, ConstantIndex};
 
 pub mod constant;
 
@@ -41,7 +41,7 @@ pub struct ClassFile
     pub magic: u32,
     pub minor_version: u16,
     pub major_version: u16,
-    pub constant_pools: Array<Constant, u16>,
+    pub constant_pool: Array<Constant, u16>,
     pub access_flags: AccessFlags,
     pub this_class: u16,
     pub super_class: u16,
@@ -144,7 +144,7 @@ impl raw::Serializable for ClassFile
 
         let minor = read.read_u16::<BigEndian>()?;
         let major = read.read_u16::<BigEndian>()?;
-        let constant_pools = Array::read(read)?;
+        let constant_pool = Array::read(read)?;
         let access_flags = read.read_u16::<BigEndian>()?;
         let this_class = read.read_u16::<BigEndian>()?;
         let super_class = read.read_u16::<BigEndian>()?;
@@ -157,7 +157,7 @@ impl raw::Serializable for ClassFile
             magic: magic,
             minor_version: minor,
             major_version: major,
-            constant_pools: constant_pools,
+            constant_pool: constant_pool,
             access_flags: AccessFlags::from_bits(access_flags).unwrap(),
             this_class: this_class,
             super_class: super_class,

@@ -20,27 +20,43 @@ pub const TAG_METHOD_HANDLE: u8 = 15;
 pub const TAG_METHOD_TYPE: u8 = 16;
 pub const TAG_INVOKE_DYNAMIC: u8 = 18;
 
+/// An index into the constant table.
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct ConstantIndex(pub u16);
+
 #[derive(Debug)]
 pub enum Constant
 {
     MethodRef {
-        class_index: u16,
-        name_and_type_index: u16,
+        class: ConstantIndex,
+        name_and_type: ConstantIndex,
+    },
+    InterfaceMethodRef {
+        class: ConstantIndex,
+        name_and_type: ConstantIndex,
     },
     FieldRef {
-        class_index: u16,
-        name_and_type_index: u16,
+        class: ConstantIndex,
+        name_and_type: ConstantIndex,
     },
     NameAndType {
-        name_index: u16,
-        descriptor_index: u16,
+        name: ConstantIndex,
+        descriptor: ConstantIndex,
     },
     Class {
-        name_index: u16,
+        name: ConstantIndex,
     },
     Utf8 {
         text: String,
     },
+    String {
+        /// An index to a 'UTF-8' constant.
+        index: ConstantIndex,
+    },
+    Integer(i32),
+    Long(i64),
+    Float(f32),
+    Double(f64),
 }
 
 impl raw::Serializable for Constant
@@ -55,46 +71,49 @@ impl raw::Serializable for Constant
                 Ok(Constant::Utf8 { text: s })
             }
             TAG_INTEGER => {
-                unimplemented!();
+                let i = read.read_i32::<BigEndian>()?;
+                Ok(Constant::Integer(i))
             },
             TAG_FLOAT => {
-                unimplemented!();
+                let f = read.read_f32::<BigEndian>()?;
+                Ok(Constant::Float(f))
             },
             TAG_LONG => {
-                unimplemented!();
+                let i = read.read_i64::<BigEndian>()?;
+                Ok(Constant::Long(i))
             },
             TAG_DOUBLE => {
-                unimplemented!();
+                let f = read.read_f64::<BigEndian>()?;
+                Ok(Constant::Double(f))
             },
             TAG_CLASS => {
-                let name_index = read.read_u16::<BigEndian>()?;
-                Ok(Constant::Class { name_index: name_index })
+                let name = ConstantIndex(read.read_u16::<BigEndian>()?);
+                Ok(Constant::Class { name: name })
             },
             TAG_STRING => {
-                unimplemented!();
+                let index = ConstantIndex(read.read_u16::<BigEndian>()?);
+                Ok(Constant::String { index: index })
             },
             TAG_FIELD_REF => {
-                let class_index = read.read_u16::<BigEndian>()?;
-                let name_and_type_index = read.read_u16::<BigEndian>()?;
-
-                Ok(Constant::FieldRef { class_index: class_index,
-                    name_and_type_index: name_and_type_index })
+                let (class, name_and_type) = self::parse_reference(read)?;
+                Ok(Constant::FieldRef { class: class,
+                    name_and_type: name_and_type })
             },
             TAG_METHOD_REF => {
-                let class_index = read.read_u16::<BigEndian>()?;
-                let name_and_type_index = read.read_u16::<BigEndian>()?;
-
-                Ok(Constant::MethodRef { class_index: class_index,
-                    name_and_type_index: name_and_type_index })
+                let (class, name_and_type) = self::parse_reference(read)?;
+                Ok(Constant::MethodRef { class: class,
+                    name_and_type: name_and_type })
             },
             TAG_INTERFACE_METHOD_REF => {
-                unimplemented!();
+                let (class, name_and_type) = self::parse_reference(read)?;
+                Ok(Constant::InterfaceMethodRef { class: class,
+                    name_and_type: name_and_type })
             },
             TAG_NAME_AND_TYPE => {
-                let name_index = read.read_u16::<BigEndian>()?;
-                let descriptor_index = read.read_u16::<BigEndian>()?;
+                let name = ConstantIndex(read.read_u16::<BigEndian>()?);
+                let descriptor = ConstantIndex(read.read_u16::<BigEndian>()?);
 
-                Ok(Constant::NameAndType { name_index: name_index, descriptor_index: descriptor_index })
+                Ok(Constant::NameAndType { name: name, descriptor: descriptor })
             },
             TAG_METHOD_HANDLE => {
                 unimplemented!();
@@ -114,3 +133,10 @@ impl raw::Serializable for Constant
     }
 }
 
+/// Parses a reference.
+/// These always have two u16s
+fn parse_reference(read: &mut Read) -> Result<(ConstantIndex, ConstantIndex), Error> {
+    let class_index = ConstantIndex(read.read_u16::<BigEndian>()?);
+    let name_and_type_index = ConstantIndex(read.read_u16::<BigEndian>()?);
+    Ok((class_index, name_and_type_index))
+}
