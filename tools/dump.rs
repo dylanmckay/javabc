@@ -2,11 +2,10 @@ extern crate javabc;
 
 use javabc::raw::Serializable;
 
-use std::{fs, env, io};
-use std::io::prelude::*;
+use std::{fs, env};
 
 fn read(file_path: &str)
-    -> Result<(), io::Error> {
+    -> Result<(), javabc::Error> {
     let mut file = fs::File::open(file_path)?;
 
     let class_file = javabc::raw::ClassFile::read(&mut file)?;

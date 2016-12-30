@@ -1,3 +1,4 @@
+use {Error, ErrorKind};
 use raw;
 
 use std::io::prelude::*;
@@ -5,6 +6,9 @@ use std::marker;
 use std::io;
 
 use byteorder::{BigEndian, ReadBytesExt};
+
+/// The class file magic number.
+pub const MAGIC: u32 = 0xcafebabe;
 
 #[derive(Debug)]
 pub struct ClassFile
@@ -72,7 +76,7 @@ pub struct Attribute;
 
 impl raw::Serializable for Constant
 {
-    fn read(read: &mut Read) -> Result<Self, io::Error> {
+    fn read(read: &mut Read) -> Result<Self, Error> {
         match read.read_u8()? {
             1 => {
                 let byte_count = read.read_u16::<BigEndian>()?;
@@ -102,51 +106,51 @@ impl raw::Serializable for Constant
         }
     }
 
-    fn write(&self, write: &mut Write) -> Result<(), io::Error> {
+    fn write(&self, write: &mut Write) -> Result<(), Error> {
         unimplemented!();
     }
 }
 
 impl raw::Serializable for Interface
 {
-    fn read(read: &mut Read) -> Result<Self, io::Error> {
+    fn read(read: &mut Read) -> Result<Self, Error> {
         unimplemented!();
     }
 
-    fn write(&self, write: &mut Write) -> Result<(), io::Error> {
+    fn write(&self, write: &mut Write) -> Result<(), Error> {
         unimplemented!();
     }
 }
 
 impl raw::Serializable for Field
 {
-    fn read(read: &mut Read) -> Result<Self, io::Error> {
+    fn read(read: &mut Read) -> Result<Self, Error> {
         unimplemented!();
     }
 
-    fn write(&self, write: &mut Write) -> Result<(), io::Error> {
+    fn write(&self, write: &mut Write) -> Result<(), Error> {
         unimplemented!();
     }
 }
 
 impl raw::Serializable for Method
 {
-    fn read(read: &mut Read) -> Result<Self, io::Error> {
+    fn read(read: &mut Read) -> Result<Self, Error> {
         unimplemented!();
     }
 
-    fn write(&self, write: &mut Write) -> Result<(), io::Error> {
+    fn write(&self, write: &mut Write) -> Result<(), Error> {
         unimplemented!();
     }
 }
 
 impl raw::Serializable for Attribute
 {
-    fn read(read: &mut Read) -> Result<Self, io::Error> {
+    fn read(read: &mut Read) -> Result<Self, Error> {
         unimplemented!();
     }
 
-    fn write(&self, write: &mut Write) -> Result<(), io::Error> {
+    fn write(&self, write: &mut Write) -> Result<(), Error> {
         unimplemented!();
     }
 }
@@ -162,7 +166,7 @@ pub struct Array<T, I>
 impl<T> raw::Serializable for Array<T,u16>
     where T: raw::Serializable
 {
-    fn read(read: &mut Read) -> Result<Self, io::Error> {
+    fn read(read: &mut Read) -> Result<Self, Error> {
         let count = read.read_u16::<BigEndian>()?;
         let mut items = Vec::new();
 
@@ -173,15 +177,20 @@ impl<T> raw::Serializable for Array<T,u16>
         Ok(Array { items: items, phantom: marker::PhantomData })
     }
 
-    fn write(&self, write: &mut Write) -> Result<(), io::Error> {
+    fn write(&self, write: &mut Write) -> Result<(), Error> {
         unimplemented!();
     }
 }
 
 impl raw::Serializable for ClassFile
 {
-    fn read(read: &mut Read) -> Result<Self, io::Error> {
+    fn read(read: &mut Read) -> Result<Self, Error> {
         let magic = read.read_u32::<BigEndian>()?;
+
+        if magic != MAGIC {
+            return Err(ErrorKind::InvalidMagicNumber(magic).into());
+        }
+
         let minor = read.read_u16::<BigEndian>()?;
         let major = read.read_u16::<BigEndian>()?;
         let constant_pools = Array::read(read)?;
@@ -208,7 +217,7 @@ impl raw::Serializable for ClassFile
         })
     }
 
-    fn write(&self, write: &mut Write) -> Result<(), io::Error> {
+    fn write(&self, write: &mut Write) -> Result<(), Error> {
         unimplemented!();
     }
 }
