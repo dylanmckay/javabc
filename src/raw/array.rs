@@ -14,21 +14,55 @@ pub struct Array<T, I>
     phantom: marker::PhantomData<I>,
 }
 
-impl<T> raw::Serializable for Array<T,u16>
-    where T: raw::Serializable
+#[derive(Debug)]
+#[repr(C)]
+pub struct OneBasedArray<T, I>
 {
-    fn read(read: &mut Read) -> Result<Self, Error> {
-        let count = read.read_u16::<BigEndian>()?;
-        let mut items = Vec::new();
+    pub items: Vec<T>,
+    phantom: marker::PhantomData<I>,
+}
 
-        for _ in 1..count {
-            items.push(T::read(read)?);
+macro_rules! impl_for_index_type {
+    ($ty:ty, $read_method:ident) => {
+        impl<T> raw::Serializable for OneBasedArray<T,$ty>
+            where T: raw::Serializable
+        {
+            fn read(read: &mut Read) -> Result<Self, Error> {
+                let count = read.$read_method::<BigEndian>()?;
+                let mut items = Vec::new();
+
+                for _ in 1..count {
+                    items.push(T::read(read)?);
+                }
+
+                Ok(OneBasedArray { items: items, phantom: marker::PhantomData })
+            }
+
+            fn write(&self, _write: &mut Write) -> Result<(), Error> {
+                unimplemented!();
+            }
         }
 
-        Ok(Array { items: items, phantom: marker::PhantomData })
-    }
+        impl<T> raw::Serializable for Array<T,$ty>
+            where T: raw::Serializable
+        {
+            fn read(read: &mut Read) -> Result<Self, Error> {
+                let count = read.$read_method::<BigEndian>()?;
+                let mut items = Vec::new();
 
-    fn write(&self, _write: &mut Write) -> Result<(), Error> {
-        unimplemented!();
+                for _ in 0..count {
+                    items.push(T::read(read)?);
+                }
+
+                Ok(Array { items: items, phantom: marker::PhantomData })
+            }
+
+            fn write(&self, _write: &mut Write) -> Result<(), Error> {
+                unimplemented!();
+            }
+        }
     }
 }
+
+impl_for_index_type!(u16, read_u16);
+impl_for_index_type!(u32, read_u32);
