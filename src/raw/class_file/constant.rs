@@ -5,25 +5,20 @@ use std::io::prelude::*;
 
 use byteorder::{BigEndian, ReadBytesExt};
 
-#[derive(Debug)]
-#[repr(u8)]
-pub enum ConstantTag
-{
-    Class = 7,
-    FieldRef = 9,
-    MethodRef = 10,
-    InterfaceMethodRef = 11,
-    String = 8,
-    Integer = 3,
-    Float = 4,
-    Long = 5,
-    Double = 6,
-    NameAndType = 12,
-    Utf8 = 1,
-    MethodHandle = 15,
-    MethodType = 16,
-    InvokeDynamic = 18,
-}
+pub const TAG_UTF8: u8 = 1;
+pub const TAG_INTEGER: u8 = 3;
+pub const TAG_FLOAT: u8 = 4;
+pub const TAG_LONG: u8 = 5;
+pub const TAG_DOUBLE: u8 = 6;
+pub const TAG_CLASS: u8 = 7;
+pub const TAG_STRING: u8 = 8;
+pub const TAG_FIELD_REF: u8 = 9;
+pub const TAG_METHOD_REF: u8 = 10;
+pub const TAG_INTERFACE_METHOD_REF: u8 = 11;
+pub const TAG_NAME_AND_TYPE: u8 = 12;
+pub const TAG_METHOD_HANDLE: u8 = 15;
+pub const TAG_METHOD_TYPE: u8 = 16;
+pub const TAG_INVOKE_DYNAMIC: u8 = 18;
 
 #[derive(Debug)]
 pub enum Constant
@@ -52,62 +47,62 @@ impl raw::Serializable for Constant
 {
     fn read(read: &mut Read) -> Result<Self, Error> {
         match read.read_u8()? {
-            1 => { // UTF-8
+            TAG_UTF8 => {
                 let byte_count = read.read_u16::<BigEndian>()?;
                 let bytes: Result<Vec<_>, _> = read.bytes().take(byte_count as _).collect();
                 let s = String::from_utf8(bytes?).unwrap();
 
                 Ok(Constant::Utf8 { text: s })
             }
-            3 => { // Integer
+            TAG_INTEGER => {
                 unimplemented!();
             },
-            4 => { // Float
+            TAG_FLOAT => {
                 unimplemented!();
             },
-            5 => { // Long
+            TAG_LONG => {
                 unimplemented!();
             },
-            6 => { // Double
+            TAG_DOUBLE => {
                 unimplemented!();
             },
-            7 => { // Class
+            TAG_CLASS => {
                 let name_index = read.read_u16::<BigEndian>()?;
                 Ok(Constant::Class { name_index: name_index })
             },
-            8 => { // String
+            TAG_STRING => {
                 unimplemented!();
             },
-            9 => { // Field reference
+            TAG_FIELD_REF => {
                 let class_index = read.read_u16::<BigEndian>()?;
                 let name_and_type_index = read.read_u16::<BigEndian>()?;
 
                 Ok(Constant::FieldRef { class_index: class_index,
                     name_and_type_index: name_and_type_index })
             },
-            10 => { // Method reference
+            TAG_METHOD_REF => {
                 let class_index = read.read_u16::<BigEndian>()?;
                 let name_and_type_index = read.read_u16::<BigEndian>()?;
 
                 Ok(Constant::MethodRef { class_index: class_index,
                     name_and_type_index: name_and_type_index })
             },
-            11 => { // Interface method reference
+            TAG_INTERFACE_METHOD_REF => {
                 unimplemented!();
             },
-            12 => { // Name and type
+            TAG_NAME_AND_TYPE => {
                 let name_index = read.read_u16::<BigEndian>()?;
                 let descriptor_index = read.read_u16::<BigEndian>()?;
 
                 Ok(Constant::NameAndType { name_index: name_index, descriptor_index: descriptor_index })
             },
-            15 => { // Method handle
+            TAG_METHOD_HANDLE => {
                 unimplemented!();
             },
-            16 => { // Method type
+            TAG_METHOD_TYPE => {
                 unimplemented!();
             },
-            18 => { // Invoke dynamic
+            TAG_INVOKE_DYNAMIC => {
                 unimplemented!();
             },
             i => Err(ErrorKind::MalformedFile(format!("invalid constant tag id: {}", i)).into()),

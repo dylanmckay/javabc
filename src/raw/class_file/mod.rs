@@ -1,4 +1,4 @@
-pub use self::constant::{ConstantTag, Constant};
+pub use self::constant::Constant;
 
 pub mod constant;
 
