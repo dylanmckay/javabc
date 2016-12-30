@@ -13,3 +13,4 @@ path = "tools/dump.rs"
 [dependencies]
 byteorder = "0.5"
 error-chain = "0.7"
+bitflags = "0.7"

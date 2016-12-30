@@ -10,6 +10,27 @@ use byteorder::{BigEndian, ReadBytesExt};
 /// The class file magic number.
 pub const MAGIC: u32 = 0xcafebabe;
 
+bitflags! {
+    pub flags AccessFlags: u16 {
+        /// Declared public; may be accessed from outside its package.
+        const ACC_PUBLIC = 0x0001,
+        /// Declared final; no subclasses allowed.
+        const ACC_FINAL = 0x0010,
+        /// Treat superclass methods specially when invoked by the invokespecial instruction.
+        const ACC_SUPER = 0x0020,
+        /// Is an interface, not a class.
+        const ACC_INTERFACE = 0x0200,
+        /// Declared abstract; must not be instantiated.
+        const ACC_ABSTRACT = 0x0400,
+        /// Declared synthetic; not present in the source code.
+        const ACC_SYNTHETIC = 0x1000,
+        /// Declared as an annotation type.
+        const ACC_ANNOTATION = 0x2000,
+        /// Declared as an enum type.
+        const ACC_ENUM = 0x4000
+    }
+}
+
 #[derive(Debug)]
 pub struct ClassFile
 {
@@ -17,7 +38,7 @@ pub struct ClassFile
     pub minor_version: u16,
     pub major_version: u16,
     pub constant_pools: Array<Constant, u16>,
-    pub access_flags: u16,
+    pub access_flags: AccessFlags,
     pub this_class: u16,
     pub super_class: u16,
     pub interfaces: Array<Interface, u16>,
@@ -207,7 +228,7 @@ impl raw::Serializable for ClassFile
             minor_version: minor,
             major_version: major,
             constant_pools: constant_pools,
-            access_flags: access_flags,
+            access_flags: AccessFlags::from_bits(access_flags).unwrap(),
             this_class: this_class,
             super_class: super_class,
             interfaces: interfaces,
