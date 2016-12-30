@@ -1,6 +1,8 @@
 pub use self::constant::{Constant, ConstantIndex};
+pub use self::method::Method;
 
 pub mod constant;
+pub mod method;
 
 use {Error, ErrorKind};
 use raw;
@@ -56,8 +58,6 @@ pub struct Interface;
 #[derive(Debug)]
 pub struct Field;
 #[derive(Debug)]
-pub struct Method;
-#[derive(Debug)]
 pub struct Attribute;
 
 impl raw::Serializable for Interface
@@ -72,17 +72,6 @@ impl raw::Serializable for Interface
 }
 
 impl raw::Serializable for Field
-{
-    fn read(read: &mut Read) -> Result<Self, Error> {
-        unimplemented!();
-    }
-
-    fn write(&self, write: &mut Write) -> Result<(), Error> {
-        unimplemented!();
-    }
-}
-
-impl raw::Serializable for Method
 {
     fn read(read: &mut Read) -> Result<Self, Error> {
         unimplemented!();
