@@ -4,10 +4,9 @@ error_chain! {
     }
 
     errors {
-        InvalidMagicNumber(got: u32) {
-            description("invalid magic number")
-            display("invalid magic number: got 0x{:x} but expected 0x{:x}",
-                    got, ::raw::class_file::MAGIC)
+        MalformedFile(message: String) {
+            description("malformed file")
+            display("malformed file: {}", message)
         }
     }
 }
