@@ -24,6 +24,14 @@ pub struct ClassFile
     pub attributes: raw::Array<raw::Attribute, u16>,
 }
 
+impl ClassFile
+{
+    pub fn get_constant(&self, index: raw::ConstantIndex) -> &raw::Constant {
+        let array_idx = index.0 - 1;
+        &self.constant_pool.items[array_idx as usize]
+    }
+}
+
 impl raw::Serializable for ClassFile
 {
     fn read(read: &mut Read) -> Result<Self, Error> {

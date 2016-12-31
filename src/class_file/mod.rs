@@ -1,20 +1,23 @@
 pub use self::constant::*;
+pub use self::method::Method;
 
 pub mod constant;
-pub mod dump;
+pub mod method;
 
 pub mod as_raw;
 pub mod from_raw;
 
+use Error;
 use raw;
 
 use std::fmt;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ClassFile
 {
     pub access_flags: raw::AccessFlags,
     pub constant_pool: ConstantPool,
+    pub methods: Vec<Method>,
 }
 
 impl ClassFile
@@ -23,14 +26,7 @@ impl ClassFile
         as_raw::as_raw(self)
     }
 
-    pub fn from_raw(raw: ::raw::ClassFile) -> Self {
+    pub fn from_raw(raw: ::raw::ClassFile) -> Result<Self, Error> {
         from_raw::from_raw(raw)
-    }
-}
-
-impl fmt::Debug for ClassFile
-{
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        dump::class(self, fmt)
     }
 }
