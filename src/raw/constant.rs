@@ -59,6 +59,17 @@ pub enum Constant
     Double(f64),
 }
 
+impl Constant
+{
+    pub fn expect_utf8(&self) -> Result<String, Error> {
+        if let Constant::Utf8 { ref text } = *self {
+            Ok(text.clone())
+        } else {
+            Err(ErrorKind::MalformedFile(format!("expected utf-8 but got {:?}", self)).into())
+        }
+    }
+}
+
 impl raw::Serializable for Constant
 {
     fn read(read: &mut Read) -> Result<Self, Error> {
