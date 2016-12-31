@@ -3,6 +3,14 @@ name = "javabc"
 version = "0.1.0"
 authors = ["Dylan McKay <dylanmckay34@gmail.com>"]
 
+description = "Java bytecode manipulation library"
+documentation = "https://docs.rs/javabc"
+repository = "https://github.com/dylanmckay/javabc"
+
+license = "MIT"
+
+keywords = ["java", "bytecode", "vm"]
+
 [lib]
 path = "src/lib.rs"
 
