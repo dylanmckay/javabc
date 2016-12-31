@@ -11,7 +11,33 @@ pub struct ConstantIndex(pub usize);
 pub enum Constant
 {
     Utf8(String),
+    MethodRef {
+        class: ConstantIndex,
+        name_and_type: ConstantIndex,
+    },
+    InterfaceMethodRef {
+        class: ConstantIndex,
+        name_and_type: ConstantIndex,
+    },
+    FieldRef {
+        class: ConstantIndex,
+        name_and_type: ConstantIndex,
+    },
+    NameAndType {
+        name: ConstantIndex,
+        descriptor: ConstantIndex,
+    },
+    Class {
+        name: ConstantIndex,
+    },
+    String {
+        /// An index to a 'UTF-8' constant.
+        index: ConstantIndex,
+    },
     Integer(i32),
+    Long(i64),
+    Float(f32),
+    Double(f64),
 }
 
 impl Constant

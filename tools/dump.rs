@@ -9,6 +9,7 @@ fn read(file_path: &str)
     let mut file = fs::File::open(file_path)?;
 
     let class_file = javabc::raw::ClassFile::read(&mut file)?;
+    let class_file = javabc::ClassFile::from_raw(class_file);
     println!("{:#?}", class_file);
 
     Ok(())

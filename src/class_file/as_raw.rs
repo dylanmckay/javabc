@@ -34,5 +34,8 @@ fn constant(constant: &Constant) -> raw::Constant {
     match *constant {
         Constant::Utf8(ref s) => raw::Constant::Utf8 { text: s.clone() },
         Constant::Integer(i) => raw::Constant::Integer(i),
+        Constant::MethodRef { .. } => unimplemented!(),
+        Constant::Class { .. } => unimplemented!(),
+        _ => unimplemented!(),
     }
 }
