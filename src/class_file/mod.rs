@@ -1,5 +1,7 @@
-pub use self::method::Method;
+pub use self::ty::{Type, PrimitiveType};
+pub use self::method::{Method, MethodSignature};
 
+pub mod ty;
 pub mod method;
 
 pub mod from_raw;

@@ -1,4 +1,4 @@
-use {ClassFile, Method, Error};
+use {ClassFile, Method, MethodSignature, Error, ErrorKind};
 use raw;
 
 pub fn from_raw(raw: raw::ClassFile) -> Result<ClassFile, Error> {
@@ -17,8 +17,16 @@ fn methods(class_file: &raw::ClassFile) -> Result<Vec<Method>, Error> {
 fn method(method: &raw::Method,
           class_file: &raw::ClassFile) -> Result<Method, Error> {
     let name = class_file.get_constant(method.name).expect_utf8()?;
+    let descriptor = class_file.get_constant(method.descriptor).expect_utf8()?;
+
+    let signature = match MethodSignature::parse_descriptor(&descriptor) {
+        Some(sig) => sig,
+        None => return Err(ErrorKind::MalformedFile(format!("'{}' is not a valid method descriptor", descriptor)).into()),
+    };
 
     Ok(Method {
+        access_flags: method.access_flags,
         name: name,
+        signature: signature,
     })
 }
