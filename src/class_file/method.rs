@@ -6,6 +6,7 @@ pub struct Method
     pub access_flags: AccessFlags,
     pub name: String,
     pub signature: MethodSignature,
+    pub bitcode: Vec<u8>,
 }
 
 /// A method signature.
